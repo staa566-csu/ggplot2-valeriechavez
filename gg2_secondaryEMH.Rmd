@@ -2,7 +2,9 @@
 title: "gg2_secondaryEMH"
 author: "Valerie Chavez"
 date: "2022-09-21"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 
@@ -79,7 +81,9 @@ genderplot<-Secondary %>% filter(gender != 77 & gender !=99) %>%
   #provided a descriptive title
   labs(title="Overall, how do you feel about your life?", subtitle = "Responses from secondary students (2021-22, n=160,672)")+
   #flipping coordinates to make a stacked bar
-  coord_flip()
+  coord_flip()+
+  #removing background
+  theme(panel.background = element_blank())
  
 genderplot
 ```
