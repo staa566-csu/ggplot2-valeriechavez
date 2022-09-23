@@ -1,0 +1,89 @@
+---
+title: "gg2_secondaryEMH"
+author: "Valerie Chavez"
+date: "2022-09-21"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+I wish to explore secondary student responses to the question: Overall, how do you feel about your life?
+Responses were on a 5 point likert scale, which consisted of 5 emojis ranging from very sad to very happy. 
+
+**Data is provided by and property of Youth Truth Student Survey, a national nonprofit, and may only be shared in aggregate for the confidentiality of students and clients.**
+
+Our sample consisted of 161,340 secondary students (Grades 6-12) in the 2021-22 school year across 19 states, and 442 schools. 
+
+Schools that choose to work with Youth Truth, and opt in to the Emotional and Mental health additional topic administered the question to students. 
+
+Loading and prepping data
+```{r cars}
+HS<-read.csv("/Users/valerier/Dropbox (CEP)/YouthTruth/Data and Research/EMH Back to School 2022/R Script and Results/HS/HS_dataclean_2022.csv")
+MS<-read.csv("/Users/valerier/Dropbox (CEP)/YouthTruth/Data and Research/EMH Back to School 2022/R Script and Results/MS/MS_dataclean_2022.csv")
+
+```
+
+
+```{r}
+HS_subset<- HS[ ,c("em_life","gender", "racen")]
+
+MS_subset<-MS[ ,c("m_em_life","m_gender", "m_racen")]
+
+colnames(MS_subset)<-c("em_life","gender", "racen")
+
+Secondary<-rbind(HS_subset,MS_subset)
+
+Secondary<-na.omit(Secondary)
+
+summary(Secondary)
+```
+
+
+Loading various libraries (as I was testing I lost track of which I used and chose not to use, so I kept them all in!)
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggthemes)
+library(viridis)
+library(viridisLite)
+library(distributional)
+library(ggdist)
+library(patchwork)
+
+```
+
+Creating Graph
+
+This is the first iteration, a stacked bar graph comparing responses by gender. It gives a good impression of the response distribution by gender
+
+```{r}
+#Manually add our YT colors for our pallette
+YTPalette<-c("#0fb2cb","#288fbd", "#b0c5cc", "#efe15f","#f99c25")
+
+
+
+#Filtering out no answer and 'skip this question' responses to the gender question as they do not provide useful data
+genderplot<-Secondary %>% filter(gender != 77 & gender !=99) %>%
+  ggplot() + 
+  #setting up bar graphs with likert data as the fill, separated by gender
+  #lyt=blank removes the outlines from the bars, which I found distracting
+  #Likert and gender data, must be entered as factor 
+  geom_bar(aes(x = gender, fill = forcats::fct_rev(factor(em_life))), position = 'fill', lty="blank")+
+  #applying custom colors and labels
+  scale_fill_manual(values= YTPalette,labels = rev(c("very negative", "negative","neutral","positive", "very positive")),name="")+
+  ylab('Proportion')+
+  scale_y_continuous(labels = scales::percent)+
+  xlab('Gender')+
+  #renaming what were numerically categorical variables
+  scale_x_discrete(limit = c("Male", "Female", "Non-binary"))+
+  #provided a descriptive title
+  labs(title="Overall, how do you feel about your life?", subtitle = "Responses from secondary students (2021-22, n=160,672)")+
+  #flipping coordinates to make a stacked bar
+  coord_flip()+
+  #removing background
+  theme(panel.background = element_blank())
+ 
+genderplot
+```
